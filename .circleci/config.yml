@@ -109,6 +109,7 @@ workflows:
 
       - aws-eks/create-cluster:
           cluster-name: capstone-cluster
+          aws-region: $AWS_DEFAULT_REGION
           requires:
             - "build-and-push"
 
