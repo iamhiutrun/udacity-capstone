@@ -1,0 +1,120 @@
+version: 2.1
+
+orbs:
+  aws-eks: circleci/aws-eks@2.1
+  kubernetes: circleci/kubernetes@1.2.0
+
+jobs:
+  lint:
+    docker:
+      - image: python:3.8.0
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "requirements.txt" }}
+            - v1-dependencies-
+
+      - run:
+          name: Install python dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            make install
+            # Install hadolint
+            wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64 &&\
+            chmod +x /bin/hadolint
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
+      - run:
+          name: Run lint
+          command: |
+            . venv/bin/activate
+            make lint
+
+  build-and-push:
+    docker:
+      - image: cimg/python:3.11.4
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 19.03.13
+      - run:
+          name: Build Docker container
+          command: |
+            docker build -t $DOCKER_PATH:${CIRCLE_WORKFLOW_ID:0:7} .
+            docker image tag $DOCKER_PATH:${CIRCLE_WORKFLOW_ID:0:7} $DOCKER_PATH
+            docker images
+      - run:
+          name: Upload Docker to Dockerhub
+          command: |
+            docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+            docker push $DOCKER_PATH:${CIRCLE_WORKFLOW_ID:0:7}
+
+  deploy:
+    docker:
+      - image: cimg/python:3.11.4
+    parameters:
+      cluster-name:
+        type: string
+        default: "capstone-cluster"
+      aws-region:
+        type: string
+        default: "us-east-1"
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            sudo apt install -y tar gzip curl
+      - kubernetes/install-kubectl
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: << parameters.cluster-name >>
+          aws-region: << parameters.aws-region >>
+          install-kubectl: true
+      - kubernetes/update-container-image:
+          container-image-updates: capstone-dev=$DOCKER_PATH:${CIRCLE_WORKFLOW_ID:0:7}
+          get-rollout-status: true
+          resource-name: deployment/capstone-deployment
+      - kubernetes/create-or-update-resource:
+          resource-file-path: ./kubernetes/deployment.yml
+          resource-name: deployment/capstone-deployment
+          get-rollout-status: true
+          show-kubectl-command: true
+      - run:
+          name: Test cluster
+          command: |
+            kubectl get nodes
+            kubectl get deployment
+            kubectl get pod -o wide
+            kubectl get services
+      - run:
+          name: Cleaning up
+          command: docker system prune
+
+workflows:
+  deployment:
+    jobs:
+      - lint
+
+      - build-and-push:
+          filters:
+            branches:
+              only:
+                - main
+          requires:
+            - "lint"
+
+      - aws-eks/create-cluster:
+          cluster-name: capstone-cluster
+          requires:
+            - "build-and-push"
+
+      - deploy:
+          cluster-name: capstone-cluster
+          aws-region: $AWS_DEFAULT_REGION
+          requires:
+            - "build"
