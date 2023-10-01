@@ -140,7 +140,7 @@ workflows:
           requires:
             - "lint"
 
-      - aws-eks/create-cluster:
+      - infrastructure:
           cluster-name: capstone-cluster
           aws-region: $AWS_DEFAULT_REGION
           aws-profile: default
