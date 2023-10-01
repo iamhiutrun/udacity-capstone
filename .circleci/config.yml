@@ -58,24 +58,10 @@ jobs:
       - image: cimg/python:3.11.4
     steps:
       - checkout
-      - run:
-          name: Set AWS credentials
-          command: |
-            echo AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID >> .env
-            echo AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY >> .env
-            echo AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN >> .env
-            echo AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION >> .env
-            echo AWS_REGION=$AWS_DEFAULT_REGION >> .env
-            cat .env
       - aws-eks/create-cluster:
           cluster-name: capstone-cluster
           aws-region: $AWS_DEFAULT_REGION
           aws-profile: default
-      - run:
-          name: Upload Docker to Dockerhub
-          command: |
-            docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-            docker push $DOCKER_PATH:${CIRCLE_WORKFLOW_ID:0:7}
 
   deploy:
     docker:
@@ -94,15 +80,6 @@ jobs:
           command: |
             sudo apt install -y tar gzip curl
       - kubernetes/install-kubectl
-      - run:
-          name: Set AWS credentials
-          command: |
-            echo AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID >> .env
-            echo AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY >> .env
-            echo AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN >> .env
-            echo AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION >> .env
-            echo AWS_REGION=$AWS_DEFAULT_REGION >> .env
-            cat .env
       - aws-eks/update-kubeconfig-with-authenticator:
           cluster-name: << parameters.cluster-name >>
           aws-region: << parameters.aws-region >>
