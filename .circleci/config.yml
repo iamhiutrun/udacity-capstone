@@ -141,9 +141,6 @@ workflows:
             - "lint"
 
       - infrastructure:
-          cluster-name: capstone-cluster
-          aws-region: $AWS_DEFAULT_REGION
-          aws-profile: default
           requires:
             - "build-and-push"
 
