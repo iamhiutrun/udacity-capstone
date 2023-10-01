@@ -61,11 +61,12 @@ jobs:
       - run:
           name: Set AWS credentials
           command: |
-            echo 'export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID' >> $BASH_ENV
-            echo 'export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY' >> $BASH_ENV
-            echo 'export AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN' >> $BASH_ENV
-            echo 'export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION' >> $BASH_ENV
-            source $BASH_ENV
+            echo AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID >> .env
+            echo AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY >> .env
+            echo AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN >> .env
+            echo AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION >> .env
+            echo AWS_REGION=$AWS_DEFAULT_REGION >> .env
+            cat .env
       - aws-eks/create-cluster:
           cluster-name: capstone-cluster
           aws-region: $AWS_DEFAULT_REGION
@@ -96,11 +97,12 @@ jobs:
       - run:
           name: Set AWS credentials
           command: |
-            echo 'export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID' >> $BASH_ENV
-            echo 'export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY' >> $BASH_ENV
-            echo 'export AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN' >> $BASH_ENV
-            echo 'export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION' >> $BASH_ENV
-            source $BASH_ENV
+            echo AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID >> .env
+            echo AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY >> .env
+            echo AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN >> .env
+            echo AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION >> .env
+            echo AWS_REGION=$AWS_DEFAULT_REGION >> .env
+            cat .env
       - aws-eks/update-kubeconfig-with-authenticator:
           cluster-name: << parameters.cluster-name >>
           aws-region: << parameters.aws-region >>
