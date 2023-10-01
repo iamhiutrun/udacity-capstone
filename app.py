@@ -1,12 +1,9 @@
 from flask import Flask
-
 app = Flask(__name__)
 
-@app.route("/")
+@app.route('/')
 def home():
-    html = f"<h3>Udacity Capstone Project-Cloud DevOps Engineer</h3>"
-    return html.format(format)
+    return "<p style='text-align: center;'>Welcome to my Capstone Project!</p>"
 
-if __name__ == "__main__":
-    # load pretrained model as clf
-    app.run(host='0.0.0.0', port=80, debug=True) # specify port=80
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=80, debug=True)
