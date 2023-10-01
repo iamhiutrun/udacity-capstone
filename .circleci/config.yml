@@ -148,4 +148,4 @@ workflows:
           cluster-name: capstone-cluster
           aws-region: $AWS_DEFAULT_REGION
           requires:
-            - "aws-eks/create-cluster"
+            - "infrastructure"
