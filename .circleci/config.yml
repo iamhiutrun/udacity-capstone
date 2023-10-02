@@ -55,11 +55,29 @@ jobs:
 
   infrastructure:
     docker:
-      - image: cimg/python:3.11.4
+      - image: amazon/aws-cli
     steps:
       - checkout
-      - aws-eks/create-cluster:
-          cluster-name: capstone-cluster
+      - run:
+          name: Install dependencies
+          command: yum install -y tar gzip
+      - run:
+          name: Ensure EKS network exists
+          command: |
+            aws cloudformation deploy \
+              --template-file cloudformation/network.yml \
+              --tags project=capstone \
+              --stack-name "capstone-network-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --region ${AWS_DEFAULT_REGION} \
+      - run:
+          name: Ensure Nodegroup exists
+          command: |
+            aws cloudformation deploy \
+              --template-file cloudformation/infra.yml \
+              --tags project=capstone \
+              --stack-name "capstone-cluster-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --region ${AWS_DEFAULT_REGION} \
+              --capabilities CAPABILITY_NAMED_IAM
 
   deploy:
     docker:
