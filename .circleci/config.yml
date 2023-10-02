@@ -78,6 +78,7 @@ jobs:
               --stack-name "capstone-cluster-${CIRCLE_WORKFLOW_ID:0:7}" \
               --region ${AWS_DEFAULT_REGION} \
               --capabilities CAPABILITY_NAMED_IAM
+              --parameter-overrides ClusterName="capstone-cluster-${CIRCLE_WORKFLOW_ID:0:7}"
 
   deploy:
     docker:
