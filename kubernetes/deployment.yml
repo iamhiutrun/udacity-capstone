@@ -22,7 +22,7 @@ spec:
         app: capstone-deployment
     spec:
       containers:
-        - name: capstone-dev
+        - name: capstone-deployment
           image: 49shine/capstone:latest
           imagePullPolicy: Always
           ports:
