@@ -163,7 +163,7 @@ workflows:
             - "network-infrastructure"
 
       - deploy:
-          cluster-name: capstone-cluster-${CIRCLE_WORKFLOW_ID:0:7}
+          cluster-name: capstone-cluster
           aws-region: $AWS_DEFAULT_REGION
           requires:
             - "cluster-infrastructure"

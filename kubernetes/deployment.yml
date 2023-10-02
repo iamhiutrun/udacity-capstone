@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: capstone-dev
-          image: 49shine/capstone:3230e0b
+          image: <<image>>:<<tag>>
           imagePullPolicy: Always
           ports:
             - containerPort: 80
