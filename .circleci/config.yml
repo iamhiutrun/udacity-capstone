@@ -64,14 +64,15 @@ jobs:
       - run:
           name: Create EKS network
           command: |
-            if aws cloudformation describe-stacks --stack-name capstone-network --region ${AWS_DEFAULT_REGION} &> /dev/null; then
-              echo "EKS network stack exists."
-            else
+            if aws cloudformation describe-stacks --stack-name "capstone-network" 2>&1 | grep -q "does not exist"; then
+              echo "EKS network stack does not exist. Deploying..."
               aws cloudformation deploy \
-              --template-file cloudformation/network.yml \
-              --tags project=capstone \
-              --stack-name "capstone-network" \
-              --region ${AWS_DEFAULT_REGION} \
+                --template-file cloudformation/network.yml \
+                --tags project=capstone \
+                --stack-name "capstone-network" \
+                --region $AWS_DEFAULT_REGION
+            else
+              echo "EKS network stack exists."
             fi
 
   cluster-infrastructure:
@@ -85,15 +86,16 @@ jobs:
       - run:
           name: Create EKS Cluster
           command: |
-            if aws cloudformation describe-stacks --stack-name capstone-network --region ${AWS_DEFAULT_REGION} &> /dev/null; then
-              echo "EKS Cluster stack exists."
-            else
+            if aws cloudformation describe-stacks --stack-name "capstone-cluster" 2>&1 | grep -q "does not exist"; then
+              echo "EKS network stack does not exist. Deploying..."
               aws cloudformation deploy \
               --template-file cloudformation/infra.yml \
               --tags project=capstone \
               --stack-name "capstone-cluster" \
               --region ${AWS_DEFAULT_REGION} \
               --capabilities CAPABILITY_NAMED_IAM
+            else
+              echo "EKS network stack exists."
             fi
 
   deploy:
