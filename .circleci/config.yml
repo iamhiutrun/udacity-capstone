@@ -119,15 +119,13 @@ jobs:
           cluster-name: << parameters.cluster-name >>
           aws-region: << parameters.aws-region >>
           install-kubectl: true
-      - kubernetes/update-container-image:
-          container-image-updates: capstone-deployment=$DOCKER_PATH:${CIRCLE_WORKFLOW_ID:0:7}
-          get-rollout-status: true
-          resource-name: deployment/capstone-deployment
       - kubernetes/create-or-update-resource:
           resource-file-path: ./kubernetes/deployment.yml
           resource-name: deployment/capstone-deployment
-          get-rollout-status: true
           show-kubectl-command: true
+      - kubernetes/update-container-image:
+          container-image-updates: capstone-deployment=$DOCKER_PATH:${CIRCLE_WORKFLOW_ID:0:7}
+          resource-name: deployment/capstone-deployment
       - run:
           name: Test cluster
           command: |
