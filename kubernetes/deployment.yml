@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: capstone-dev
-          image: <<image>>:<<tag>>
+          image: <<docker_image>>:<<tag>>
           imagePullPolicy: Always
           ports:
             - containerPort: 80
