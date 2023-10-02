@@ -1,28 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: capstone-deployment
+  name: capstone-dev
   labels:
-    app: capstone-deployment
+    app: capstone-dev
   namespace: default
 spec:
-  progressDeadlineSeconds: 3600
   replicas: 3
   selector:
     matchLabels:
-      app: capstone-deployment
-  strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
+      app: capstone-dev
   template:
     metadata:
       labels:
-        app: capstone-deployment
+        app: capstone-dev
     spec:
       containers:
-        - name: capstone-deployment
+        - name: capstone-dev
           image: 49shine/capstone:3230e0b
           imagePullPolicy: Always
           ports:
@@ -32,13 +26,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: capstone-service
+  name: capstone-dev
   labels:
-    app: capstone-service
+    app: capstone-dev
 spec:
   type: LoadBalancer
   selector:
-    app: capstone-service
+    app: capstone-dev
   ports:
     - port: 80
       targetPort: 80

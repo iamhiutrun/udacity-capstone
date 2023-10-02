@@ -86,18 +86,13 @@ jobs:
       - run:
           name: Create EKS Cluster
           command: |
-            if aws cloudformation describe-stacks --stack-name "capstone-cluster" 2>&1 | grep -q "does not exist"; then
-              echo "EKS network stack does not exist. Deploying..."
-              aws cloudformation deploy \
-              --template-file cloudformation/infra.yml \
-              --tags project=capstone \
-              --stack-name "capstone-cluster" \
-              --region ${AWS_DEFAULT_REGION} \
-              --capabilities CAPABILITY_NAMED_IAM
-            else
-              echo "EKS network stack exists."
-            fi
-
+            aws cloudformation deploy \
+            --template-file cloudformation/infra.yml \
+            --tags project=capstone \
+            --stack-name "capstone-cluster-${CIRCLE_WORKFLOW_ID:0:7}" \
+            --region ${AWS_DEFAULT_REGION} \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --parameter-overrides ClusterName=capstone-cluster-${CIRCLE_WORKFLOW_ID:0:7}
   deploy:
     docker:
       - image: cimg/python:3.11.4
@@ -121,11 +116,11 @@ jobs:
           install-kubectl: true
       - kubernetes/create-or-update-resource:
           resource-file-path: ./kubernetes/deployment.yml
-          resource-name: deployment/capstone-deployment
+          resource-name: deployment/capstone-dev
           show-kubectl-command: true
       - kubernetes/update-container-image:
-          container-image-updates: capstone-deployment=$DOCKER_PATH:${CIRCLE_WORKFLOW_ID:0:7}
-          resource-name: deployment/capstone-deployment
+          container-image-updates: capstone-dev=$DOCKER_PATH:${CIRCLE_WORKFLOW_ID:0:7}
+          resource-name: deployment/capstone-dev
           get-rollout-status: true
       - run:
           name: Test cluster
@@ -160,7 +155,7 @@ workflows:
             - "network-infrastructure"
 
       - deploy:
-          cluster-name: capstone-cluster
+          cluster-name: capstone-cluster-${CIRCLE_WORKFLOW_ID:0:7}
           aws-region: $AWS_DEFAULT_REGION
           requires:
             - "cluster-infrastructure"
