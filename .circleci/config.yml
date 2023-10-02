@@ -53,7 +53,7 @@ jobs:
             docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
             docker push $DOCKER_PATH:${CIRCLE_WORKFLOW_ID:0:7}
 
-  infrastructure:
+  network-infrastructure:
     docker:
       - image: amazon/aws-cli
     steps:
@@ -64,21 +64,37 @@ jobs:
       - run:
           name: Create EKS network
           command: |
-            aws cloudformation deploy \
+            if aws cloudformation describe-stacks --stack-name capstone-network --region ${AWS_DEFAULT_REGION} &> /dev/null; then
+              echo "EKS network stack exists."
+            else
+              aws cloudformation deploy \
               --template-file cloudformation/network.yml \
               --tags project=capstone \
-              --stack-name "capstone-network-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --stack-name "capstone-network" \
               --region ${AWS_DEFAULT_REGION} \
+            fi
+
+  cluster-infrastructure:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: yum install -y tar gzip
       - run:
           name: Create EKS Cluster
           command: |
-            aws cloudformation deploy \
+            if aws cloudformation describe-stacks --stack-name capstone-network --region ${AWS_DEFAULT_REGION} &> /dev/null; then
+              echo "EKS Cluster stack exists."
+            else
+              aws cloudformation deploy \
               --template-file cloudformation/infra.yml \
               --tags project=capstone \
-              --stack-name "capstone-cluster-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --stack-name "capstone-cluster" \
               --region ${AWS_DEFAULT_REGION} \
               --capabilities CAPABILITY_NAMED_IAM
-              --parameter-overrides ClusterName="capstone-cluster-${CIRCLE_WORKFLOW_ID:0:7}"
+            fi
 
   deploy:
     docker:
@@ -134,12 +150,16 @@ workflows:
           requires:
             - "lint"
 
-      - infrastructure:
+      - network-infrastructure:
           requires:
             - "build-and-push"
+
+      - cluster-infrastructure:
+          requires:
+            - "network-infrastructure"
 
       - deploy:
           cluster-name: capstone-cluster
           aws-region: $AWS_DEFAULT_REGION
           requires:
-            - "infrastructure"
+            - "cluster-infrastructure"
