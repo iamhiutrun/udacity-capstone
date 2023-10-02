@@ -25,3 +25,5 @@ NAME           TYPE           CLUSTER-IP       EXTERNAL-IP                      
 capstone-dev   LoadBalancer   10.100.100.128   a0ff404d4cdff458f9759c4a49b41a3b-1250996170.us-east-1.elb.amazonaws.com   80:31280/TCP   26m
 kubernetes     ClusterIP      10.100.0.1       <none>                                                                    443/TCP        4h28m
 ```
+## GitHub URL
+https://github.com/26shine/udacity-capstone
