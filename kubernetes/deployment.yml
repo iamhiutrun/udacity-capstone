@@ -23,17 +23,10 @@ spec:
     spec:
       containers:
         - name: capstone-deployment
-          image: 49shine/capstone:latest
+          image: 49shine/capstone:3230e0b
           imagePullPolicy: Always
           ports:
             - containerPort: 80
-          resources:
-            requests:
-              memory: "128Mi"
-              cpu: "500m"
-            limits:
-              memory: "128Mi"
-              cpu: "500m"
 
 ---
 apiVersion: v1
@@ -41,7 +34,7 @@ kind: Service
 metadata:
   name: capstone-service
   labels:
-    app: ccapstone-service
+    app: capstone-service
 spec:
   type: LoadBalancer
   selector:
@@ -49,5 +42,4 @@ spec:
   ports:
     - port: 80
       targetPort: 80
-      nodePort: 30000
       protocol: TCP
