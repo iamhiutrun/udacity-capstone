@@ -37,6 +37,9 @@ Resources:
       Path: /
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+        - "arn:aws:iam::aws:policy/ElasticLoadBalancingFullAccess"
+        - "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
+
   EksNodeRole:
     Type: AWS::IAM::Role
     Properties: 
