@@ -62,7 +62,7 @@ jobs:
           name: Install dependencies
           command: yum install -y tar gzip
       - run:
-          name: Ensure EKS network exists
+          name: Create EKS network
           command: |
             aws cloudformation deploy \
               --template-file cloudformation/network.yml \
@@ -70,7 +70,7 @@ jobs:
               --stack-name "capstone-network-${CIRCLE_WORKFLOW_ID:0:7}" \
               --region ${AWS_DEFAULT_REGION} \
       - run:
-          name: Ensure Nodegroup exists
+          name: Create EKS Cluster
           command: |
             aws cloudformation deploy \
               --template-file cloudformation/infra.yml \
