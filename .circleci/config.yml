@@ -86,13 +86,19 @@ jobs:
       - run:
           name: Create EKS Cluster
           command: |
-            aws cloudformation deploy \
-            --template-file cloudformation/infra.yml \
-            --tags project=capstone \
-            --stack-name "capstone-cluster-${CIRCLE_WORKFLOW_ID:0:7}" \
-            --region ${AWS_DEFAULT_REGION} \
-            --capabilities CAPABILITY_NAMED_IAM \
-            --parameter-overrides ClusterName=capstone-cluster-${CIRCLE_WORKFLOW_ID:0:7}
+            if aws cloudformation describe-stacks --stack-name "apstone-cluster" 2>&1 | grep -q "does not exist"; then
+              echo "EKS Cluster stack does not exist. Deploying..."
+              aws cloudformation deploy \
+              --template-file cloudformation/infra.yml \
+              --tags project=capstone \
+              --stack-name "capstone-cluster" \
+              --region ${AWS_DEFAULT_REGION} \
+              --capabilities CAPABILITY_NAMED_IAM \
+              --parameter-overrides ClusterName=capstone-cluster
+            else
+              echo "EKS Cluster stack exists."
+            fi
+
   deploy:
     docker:
       - image: cimg/python:3.11.4
@@ -117,10 +123,12 @@ jobs:
       - kubernetes/create-or-update-resource:
           resource-file-path: ./kubernetes/deployment.yml
           resource-name: deployment/capstone-dev
+          get-rollout-status: true
           show-kubectl-command: true
       - kubernetes/update-container-image:
           container-image-updates: capstone-dev=$DOCKER_PATH:${CIRCLE_WORKFLOW_ID:0:7}
           resource-name: deployment/capstone-dev
+          show-kubectl-command: true
           get-rollout-status: true
       - run:
           name: Test cluster
